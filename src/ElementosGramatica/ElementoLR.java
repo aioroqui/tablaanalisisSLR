@@ -145,7 +145,7 @@ public final class ElementoLR {
             prod.append(".");
         }
 
-        /* Si tenemos un simbolo de delanto, devolverlo. */
+        /* Si tenemos un simbolo de adelanto, devolverlo. */
         if (simbadelanto != null) {
             prod.append("  [");
             prod.append(simbadelanto);

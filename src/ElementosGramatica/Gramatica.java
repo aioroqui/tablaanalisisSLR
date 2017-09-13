@@ -112,11 +112,11 @@ public final class Gramatica implements Iterable<Produccion> {
 
     @Override
     public String toString() {
-        StringBuilder cadena = new StringBuilder();
+        StringBuilder gramatica = new StringBuilder();
         for (Produccion p : this) {
-            cadena.append(p.toString());
-            cadena.append("\n");
+            gramatica.append(p.toString());
+            gramatica.append("\n");
         }
-        return cadena.toString();
+        return gramatica.toString();
     }
 }

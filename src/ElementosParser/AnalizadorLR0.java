@@ -108,13 +108,13 @@ public final class AnalizadorLR0 {
     }
 
     /*Dado un conjunto parcual de elementos LR, devuelve la clausura del conjunto*/
-    private static Set<ElementoLR> clausuraDe(Set<ElementoLR> inicial,
+    private static Set<ElementoLR> clausuraDe(Set<ElementoLR> nt,
             Gramatica g) {
         /* Reservamos espacio para el resultado. */
         Set<ElementoLR> resultado = new HashSet<ElementoLR>();
 
         /* Añadimos el conjunto inicial en listaConfProc. */
-        Queue<ElementoLR> listaConfProc = new LinkedList<ElementoLR>(inicial);
+        Queue<ElementoLR> listaConfProc = new LinkedList<ElementoLR>(nt);
 
         /* Mientras haya elementos a la izquierda, continuamos con el proceso*/
         while (!listaConfProc.isEmpty()) {
@@ -229,7 +229,7 @@ public final class AnalizadorLR0 {
             /* Comprobamos qué acciones podemos realizar. Iniciamos en null. */
             AccionLR accion = null;
             AccionLR reducir = null;
-
+           
             /* Para cada elemento en el conjunto, miramos qué producción se ha aplicado. */
             for (ElementoLR item : items) {
                 /* Si la producción se ha completadoo, reducimos. */
@@ -274,18 +274,18 @@ public final class AnalizadorLR0 {
      */
     private static final class tablaEstSim {
 
-        /* Los estados del autómata.*/
-        private final Set<ElementoLR> estado;
+        /* Los items del autómata.*/
+        private final Set<ElementoLR> item;
 
         /*El símbolo que se está procesando. */
         private final Simbolo simbolo;
 
-        /* Construir tablaEstSim fdados el par estado/simbolo.*/
-        public tablaEstSim(Set<ElementoLR> estado, Simbolo simbolo) {
-            assert estado != null;
+        /* Construir tablaEstSim fdados el par item/simbolo.*/
+        public tablaEstSim(Set<ElementoLR> item, Simbolo simbolo) {
+            assert item != null;
             assert simbolo != null;
 
-            this.estado = estado;
+            this.item = item;
             this.simbolo = simbolo;
         }
 
@@ -297,17 +297,17 @@ public final class AnalizadorLR0 {
             }
 
             tablaEstSim other = (tablaEstSim) o;
-            return estado == other.estado && simbolo.equals(other.simbolo);
+            return item == other.item && simbolo.equals(other.simbolo);
         }
 
         @Override
         public int hashCode() {
 
-            return 31 * System.identityHashCode(estado) + simbolo.hashCode();
+            return 31 * System.identityHashCode(item) + simbolo.hashCode();
         }
 
         public String toString() {
-            return "(" + estado + ", " + simbolo + ")";
+            return   item + ", " + simbolo ;
         }
     }
 
@@ -330,17 +330,17 @@ public final class AnalizadorLR0 {
              * El estado en el que se encuenra cuando el símbolo se encuentra en
              * la cima de la pila.
              */
-            public final Set<ElementoLR> estado;
+            public final Set<ElementoLR> item;
 
             /* Constructor con un arbol y un estado del autómata.*/
-            public EntradaPila(ArbolAnalisis arbol, Set<ElementoLR> estado) {
+            public EntradaPila(ArbolAnalisis arbol, Set<ElementoLR> item) {
                 this.arbol = arbol;
-                this.estado = estado;
+                this.item = item;
             }
         }
 
         /*Análsis de la pila. */
-        private final Deque<EntradaPila> analizandoPila = new ArrayDeque<>();
+        private final Deque<EntradaPila> pila = new ArrayDeque<>();
 
         /*Si hay una acción "Aceptar", generamos el árbol.*/
         private ArbolAnalisis resultado = null;
@@ -348,12 +348,12 @@ public final class AnalizadorLR0 {
         /* Contruimos un nuevo LR(0) con la acción y la tabla ir_a. */
         public LR0Parser(Map<tablaEstSim, Set<ElementoLR>> tablaIra,
                 Map<Set<ElementoLR>, AccionLR> tablaAccion,
-                Set<ElementoLR> estadoInicial) {
+                Set<ElementoLR> itemInicial) {
             this.tablaIra = tablaIra;
             this.tablaAccion = tablaAccion;
 
-            /* incicamos el analizas colocando a la entrada el estado inciald del autómata*/
-            analizandoPila.offerLast(new EntradaPila(null, estadoInicial));
+            /* incicamos el analizas colocando a la entrada el item inciald del autómata*/
+            pila.offerLast(new EntradaPila(null, itemInicial));
         }
 
         /* Procesa un nuevo token de la entrada.*/
@@ -365,28 +365,28 @@ public final class AnalizadorLR0 {
                 throw new ErrorParseException("EOF esperado, encontrado " + terminal);
             }
 
-            /* Comprobamos en qué estado estanos.*/
-            Set<ElementoLR> estado = analizandoPila.peekLast().estado;
+            /* Comprobamos en qué item estanos.*/
+            Set<ElementoLR> item = pila.peekLast().item;
 
             /* La acción de aqui debería ser un desplazamiento.*/
-            assert tablaAccion.get(estado) instanceof AccionDesplazar;
-            Set<ElementoLR> nuevoEstado = tablaIra.get(new tablaEstSim(estado, terminal));
+            assert tablaAccion.get(item) instanceof AccionDesplazar;
+            Set<ElementoLR> nuevoIitem = tablaIra.get(new tablaEstSim(item, terminal));
 
-            /* Podriamos no tener un estado al que ir si no se ha definido la transción
+            /* Podriamos no tener un item al que ir si no se ha definido la transción
              * Si ocurre, reportameos un error. 
              */
-            if (nuevoEstado == null) {
+            if (nuevoIitem == null) {
                 throw new ErrorParseException("Falta: " + terminal);
             }
 
-            /*Desplazar el token dentro de la pila e introducir este nuevo estado.*/
-            analizandoPila.offerLast(new EntradaPila(new ArbolAnalisis(terminal), nuevoEstado));
+            /*Desplazar el token dentro de la pila e introducir este nuevo item.*/
+            pila.offerLast(new EntradaPila(new ArbolAnalisis(terminal), nuevoIitem));
 
             /* Mientras la acción actual a aplicaar es reducir o aceptar 
 	     * aplicamos la acción.
              */
             while (true) {
-                AccionLR accion = tablaAccion.get(nuevoEstado);
+                AccionLR accion = tablaAccion.get(nuevoIitem);
 
                 /* Accion = DESPLAZAR, salimos. */
                 if (accion instanceof AccionDesplazar) {
@@ -394,7 +394,7 @@ public final class AnalizadorLR0 {
                 } else if (accion instanceof AccionAceptar) { 
                 /* Accion = ACEPTAR, copiamos el arbol sobre el elemento de la pila 
                  * y paramos.*/
-                    this.resultado = analizandoPila.peekLast().arbol;
+                    this.resultado = pila.peekLast().arbol;
                     return;
                 }else {
                      /* Accion = REDUCIR aplicamos las reducciones
@@ -402,39 +402,30 @@ public final class AnalizadorLR0 {
                      */ 
                     assert accion instanceof AccionReducir;
                     Produccion produccion = ((AccionReducir) accion).getProduccion();
-                    /* Necesitamos reducir terminales y noterminales a noterminales que los derivan.
-                    * Para ello:
-                    * 1.- Actualizamos la pila
-                    * 2.- Crear un nodo en el árbol de análisis para el nuevo noterminal
-                    * 3.- Desplazar el símbolo noterminal que acabamos de agregar
-                    * Comenzamos sacando los símbolos desde la pila y los añadimos 
-                    * a la lista enlazada en orden inverso (para que coincida con la producción)
-                     */
+                   
                     LinkedList<ArbolAnalisis> hijo = new LinkedList<>();
-                    for (int i = 0; i < produccion.getProduccion().size(); ++i) {
-                        hijo.offerFirst(analizandoPila.removeLast().arbol);
+                    for (int i = 0; i < produccion.getProduccion().size(); i++) {
+                        hijo.offerFirst(pila.removeLast().arbol);
                     }
 
-                    /* Construct a new parse arbol node for the appropriate
-                     * nonterminal that has these hijo.
-                     */
+                    
                     ArbolAnalisis nuevoArbol = new ArbolAnalisis(produccion.getNoterminal(),
                             hijo);
 
-                    assert !analizandoPila.isEmpty();
-                    nuevoEstado = analizandoPila.peekLast().estado;
+                    assert !pila.isEmpty();
+                    nuevoIitem = pila.peekLast().item;
 
-                    /* Consultamos la tabla GOTO para mmirar el último estado en el que se ha quedado  
-		     * Se ha actualziado el nuevo estado pero no hemos parado la pila.
+                    /* Consultamos la tabla GOTO para mmirar el último item en el que se ha quedado  
+		     * Se ha actualziado el nuevo item pero no hemos parado la pila.
                      */
-                    nuevoEstado = tablaIra.get(new tablaEstSim(nuevoEstado,
+                    nuevoIitem = tablaIra.get(new tablaEstSim(nuevoIitem,
                             produccion.getNoterminal()));
-                    assert nuevoEstado != null;
+                    assert nuevoIitem != null;
 
-                    /* Colcoar este nuevo estado, junto con el nuevo arbol,
+                    /* Colcoar este nuevo item, junto con el nuevo arbol,
                      * en la cima de la pila
                      */
-                    analizandoPila.offerLast(new EntradaPila(nuevoArbol, nuevoEstado));
+                    pila.offerLast(new EntradaPila(nuevoArbol, nuevoIitem));
 
                    }
             }
@@ -509,10 +500,14 @@ public final class AnalizadorLR0 {
     
      public static void formatearTablaAccion(Map<Set<ElementoLR>, AccionLR> tablaA) {
          int i = 0;
+         int num_estado;
          ConstructorTabla tabla = new ConstructorTabla();
+         
          tabla.addRow(" ESTADO ","  ACCION  ");
          tabla.addRow("-------------", "-------------------");
+         
          for (Set<ElementoLR> eleA : tablaA.keySet()) {
+             
             tabla.addRow(Integer.toHexString(i)+ " " + eleA.toString(),"  " + tablaA.get(eleA).toString());
             i++;
          }

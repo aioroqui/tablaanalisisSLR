@@ -9,9 +9,11 @@ package Acciones;
  */
 public enum AccionDesplazar implements AccionLR {
     INSTANCE;
-
+    
     @Override
     public String toString() {
-        return "D";
+         return "D";
     }
-}
+
+}  
+

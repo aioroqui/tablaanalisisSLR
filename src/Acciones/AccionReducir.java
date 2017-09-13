@@ -18,14 +18,6 @@ public final class AccionReducir implements AccionLR {
     private final Produccion produccion;
     private final List<Simbolo> simbolo;
 
-    /* Crea una instacnacia AccionReducir que encapsulará la producción.
-    public AccionReducir(Produccion produccion) {
-        if (produccion == null) {
-            throw new NullPointerException();
-        }
-        this.produccion = produccion;
-    }
-    */
      public AccionReducir(Produccion produccion, List<Simbolo> simbolo) {
         if (produccion == null) {
             throw new NullPointerException();
@@ -63,13 +55,7 @@ public final class AccionReducir implements AccionLR {
         StringBuilder reducir = new StringBuilder();
         reducir.append("R");
         reducir.append(produccion.getNumProduccion());
-        reducir.append(" ");
-        reducir.append("[");
-        for (int i = 0; i < this.simbolo.size(); i++){
-            reducir.append(this.simbolo.get(i));
-            reducir.append(" ");
-        }
-        reducir.append("}");
+            
         return reducir.toString();
     }
 }
