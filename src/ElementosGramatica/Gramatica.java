@@ -102,7 +102,7 @@ public final class Gramatica implements Iterable<Produccion> {
         return Collections.unmodifiableCollection(noterminales);
     }
 
-    public Collection<Produccion> getProduccionesPara(Noterminal nt) {
+    public Collection<Produccion> getProduccionesPara(Simbolo nt) {
         Collection<Produccion> resultado = produccionesPara.get(nt);
         if (resultado == null) {
             throw new IllegalArgumentException("Símbolo Noterminal " + nt + " no encontrado.");

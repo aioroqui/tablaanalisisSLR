@@ -5,7 +5,7 @@ public abstract class Simbolo {
     /* El nombre de los símbolos. */
     private String nombre;
 
-    /* Comprobar si un s�mibolo terminal. */
+    /* Comprobar si un símbolo terminal. */
     private boolean terminal;
 
     Simbolo(String nombre, boolean esTerminal) {
@@ -18,7 +18,8 @@ public abstract class Simbolo {
     }
 
     public final boolean esTerminal() {
-        return terminal;
+       
+         return terminal;
     }
 
     public final String getNombre() {

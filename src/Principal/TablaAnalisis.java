@@ -15,10 +15,12 @@ public class TablaAnalisis {
 
         if (args.length == 0) {
             System.out.println("Introduzca el fichero con la gramática.");
+            return;
         }
         
         if (args.length >= 2) {
             System.out.println("Sólo se procesa el primer fichero introducido.");
+            return;
         }
         
         String path = args[0];

@@ -108,36 +108,71 @@ public final class AnalizadorLR0 {
     }
 
     /*Dado un conjunto parcual de elementos LR, devuelve la clausura del conjunto*/
-    private static Set<ElementoLR> clausuraDe(Set<ElementoLR> nt,
+    private static Set<ElementoLR> clausuraDe(Set<ElementoLR> elementos,
             Gramatica g) {
         /* Reservamos espacio para el resultado. */
-        Set<ElementoLR> resultado = new HashSet<ElementoLR>();
+        Set<ElementoLR> clausura = new HashSet<ElementoLR>();
 
-        /* Añadimos el conjunto inicial en listaConfProc. */
-        Queue<ElementoLR> listaConfProc = new LinkedList<ElementoLR>(nt);
-
+        /* Añadimos el conjunto inicial en listaConfProc.*/
+        Queue<ElementoLR> listaConfProc = new LinkedList<ElementoLR>(elementos);
+        
+       
         /* Mientras haya elementos a la izquierda, continuamos con el proceso*/
+       
         while (!listaConfProc.isEmpty()) {
-            ElementoLR act = listaConfProc.remove();
-
-            /* Si ya hemos procesado este elemento, lo saltamos. */
-            if (!resultado.add(act)) {
+            ElementoLR item = listaConfProc.remove();
+           
+            /* Si ya hemos procesado este elemento, lo saltamos.*/ 
+            if (!clausura.add(item)) {
                 continue;
             }
 
             /* Si el símbolo después del punto es no terminal. 
              * Entonces añadir un nuevo elemento LR con todas sus producciones que
-             * pueden ser iniciadas
-             */
-            Simbolo siguiente = act.getSimboloTrasPunto();
-            if (siguiente instanceof Noterminal) {
-                for (Produccion p : g.getProduccionesPara((Noterminal) siguiente)) {
-                    listaConfProc.add(new ElementoLR(p, 0, null));
+             * pueden ser iniciadas*/
+             
+            Simbolo siguiente = item.getSimboloTrasPunto();
+            if (siguiente instanceof Noterminal){
+            
+               
+               for (Produccion p : g.getProduccionesPara((Noterminal) siguiente)) {
+                     listaConfProc.add(new ElementoLR(p, 0, null));
                 }
             }
         }
-        return resultado;
+        
+        return clausura;
     }
+    
+    /*
+    private Set<ElementoLR> clausuraDe(Set<ElementoLR> elementos){
+
+    Set<ElementoLR> clausura = new HashSet<ElementoLR>();
+
+    for (ElementoLR item:elementos)
+    {
+        clausura.add(item);
+
+        for (int i = 0; i < clausura.size(); i++)
+        {
+            Simbolo simb = clausura.add(item.getProduccion());
+                    
+            
+
+            if simb != null)
+            {
+                var temp = GetElements().Where(e => e.Production.Left == sm && e.Position == 0);
+
+                clausura.UnionWith(temp);
+            }
+        }
+    }
+
+    return clausura;
+    }*/
+    
+    
+    
 
     /* Dado una configuración LR, devuelve el conjunto de sucesores del símbolo*/
     private static Map<Simbolo, Set<ElementoLR>>
@@ -251,8 +286,8 @@ public final class AnalizadorLR0 {
                 } else {
                     /* Si tenemos que desplazar. */
                     if (accion != null && accion != AccionDesplazar.INSTANCE) {
-                        System.out.println("CONFLICTO EN LR0: " + accion + " vs " + AccionDesplazar.INSTANCE);
-                        System.out.println("<<--SE CONTINÚA HACIA SLR-->>");
+                        throw new GramaticaNoSLRException("CONFLICTO EN SLR: " + accion + " vs " + AccionDesplazar.INSTANCE);
+                        //System.out.println("<<--SE CONTINÚA HACIA SLR-->>");
 
                     }
                     accion = AccionDesplazar.INSTANCE;
@@ -307,7 +342,7 @@ public final class AnalizadorLR0 {
         }
 
         public String toString() {
-            return   item + ", " + simbolo ;
+            return "[" + item + ", " + simbolo + "]" ;
         }
     }
 
